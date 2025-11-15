@@ -2,7 +2,7 @@
 import React, { useState, useRef, useMemo, useCallback } from 'react';
 import LifeCalendar from './components/LifeCalendar';
 import Controls from './components/Controls';
-import type { PaperSize, Language } from './types';
+import type { PaperSize, Language, Goals } from './types';
 import { t } from './i18n/utils';
 
 // Declare global libraries loaded via script tags
@@ -23,6 +23,7 @@ const App: React.FC = () => {
   const [paperSize, setPaperSize] = useState<PaperSize>('A3');
   const [language, setLanguage] = useState<Language>(getInitialLanguage());
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [goals, setGoals] = useState<Goals>({});
   const calendarRef = useRef<HTMLDivElement>(null);
 
   const weeksLived = useMemo(() => {
@@ -37,6 +38,26 @@ const App: React.FC = () => {
       return 0;
     }
   }, [birthDate]);
+
+  const handleSetGoal = useCallback((weekNumber: number, goalText: string) => {
+    setGoals(prevGoals => {
+      const newGoals = { ...prevGoals };
+      if (goalText.trim() === '') {
+        delete newGoals[weekNumber];
+      } else {
+        newGoals[weekNumber] = goalText;
+      }
+      return newGoals;
+    });
+  }, []);
+  
+  const handleDeleteGoal = useCallback((weekNumber: number) => {
+    setGoals(prevGoals => {
+      const newGoals = { ...prevGoals };
+      delete newGoals[weekNumber];
+      return newGoals;
+    });
+  }, []);
 
   const handleDownloadPdf = useCallback(async () => {
     if (!calendarRef.current || !window.jspdf || !window.html2canvas) {
@@ -107,7 +128,15 @@ const App: React.FC = () => {
         />
 
         <div className="mt-8 bg-gray-800/50 rounded-lg shadow-2xl p-4 sm:p-6 overflow-x-auto">
-          <LifeCalendar ref={calendarRef} weeksLived={weeksLived} birthDate={birthDate} language={language}/>
+          <LifeCalendar 
+            ref={calendarRef} 
+            weeksLived={weeksLived} 
+            birthDate={birthDate} 
+            language={language}
+            goals={goals}
+            onSetGoal={handleSetGoal}
+            onDeleteGoal={handleDeleteGoal}
+          />
         </div>
         
         <footer className="text-center mt-8 text-sm text-gray-500">

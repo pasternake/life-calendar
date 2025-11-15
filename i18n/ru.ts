@@ -14,4 +14,10 @@ export default {
   pdfAlert: 'Библиотека для генерации PDF не загружена. Пожалуйста, обновите страницу.',
   pdfError: 'Произошла ошибка при создании PDF. Подробности смотрите в консоли.',
   weekTitle: 'Год {year}, Неделя {week}',
+  goalSetTooltip: 'Год {year}, Неделя {week}\nЦель: {goal}',
+  goalModalTitle: 'Цель на Год {year}, Неделя {week}',
+  goalInputPlaceholder: 'Введите вашу цель или заметку на эту неделю...',
+  saveButton: 'Сохранить',
+  deleteButton: 'Удалить',
+  closeButton: 'Закрыть',
 };

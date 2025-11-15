@@ -14,4 +14,10 @@ export default {
   pdfAlert: 'PDF generation library is not loaded. Please refresh the page.',
   pdfError: 'An error occurred while generating the PDF. Please check the console for details.',
   weekTitle: 'Year {year}, Week {week}',
+  goalSetTooltip: 'Year {year}, Week {week}\nGoal: {goal}',
+  goalModalTitle: 'Goal for Year {year}, Week {week}',
+  goalInputPlaceholder: 'Enter your goal or milestone for this week...',
+  saveButton: 'Save',
+  deleteButton: 'Delete',
+  closeButton: 'Close',
 };

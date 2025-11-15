@@ -49,9 +49,9 @@ const LifeCalendar = forwardRef<HTMLDivElement, LifeCalendarProps>(
           </div>
 
           <div className="flex items-start">
-            <div className="grid gap-y-[3px]" style={{ gridTemplateRows: `repeat(${TOTAL_YEARS}, 1fr)` }}>
+            <div className="grid gap-y-0.5">
               {Array.from({ length: TOTAL_YEARS }).map((_, yearIndex) => (
-                <div key={yearIndex} className="h-4 text-xs text-gray-500 pr-3 text-right flex items-center justify-end font-mono">
+                <div key={yearIndex} className="h-3 md:h-3.5 text-xs text-gray-500 pr-3 text-right flex items-center justify-end font-mono">
                   {(yearIndex + 1) % 5 === 0 && (yearIndex + 1)}
                 </div>
               ))}

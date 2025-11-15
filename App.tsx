@@ -2,7 +2,8 @@
 import React, { useState, useRef, useMemo, useCallback } from 'react';
 import LifeCalendar from './components/LifeCalendar';
 import Controls from './components/Controls';
-import type { PaperSize } from './types';
+import type { PaperSize, Language } from './types';
+import { t } from './i18n/utils';
 
 // Declare global libraries loaded via script tags
 declare global {
@@ -12,9 +13,15 @@ declare global {
   }
 }
 
+const getInitialLanguage = (): Language => {
+  const browserLang = navigator.language.split('-')[0];
+  return browserLang === 'ru' ? 'ru' : 'en';
+};
+
 const App: React.FC = () => {
   const [birthDate, setBirthDate] = useState<string>('1990-01-01');
   const [paperSize, setPaperSize] = useState<PaperSize>('A3');
+  const [language, setLanguage] = useState<Language>(getInitialLanguage());
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const calendarRef = useRef<HTMLDivElement>(null);
 
@@ -33,7 +40,7 @@ const App: React.FC = () => {
 
   const handleDownloadPdf = useCallback(async () => {
     if (!calendarRef.current || !window.jspdf || !window.html2canvas) {
-      alert("PDF generation library is not loaded. Please refresh the page.");
+      alert(t(language, 'pdfAlert'));
       return;
     }
     setIsGenerating(true);
@@ -74,18 +81,18 @@ const App: React.FC = () => {
 
     } catch (error) {
       console.error("Failed to generate PDF", error);
-      alert("An error occurred while generating the PDF. Please check the console for details.");
+      alert(t(language, 'pdfError'));
     } finally {
       setIsGenerating(false);
     }
-  }, [paperSize, birthDate]);
+  }, [paperSize, birthDate, language]);
 
   return (
     <main className="min-h-screen bg-gray-900 text-gray-200 font-sans flex flex-col items-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-7xl mx-auto">
         <header className="text-center mb-6">
-          <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight">Life Calendar</h1>
-          <p className="mt-2 text-lg text-gray-400 max-w-3xl mx-auto">Each box is a week of your life. A visual reminder that our time is precious.</p>
+          <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight">{t(language, 'title')}</h1>
+          <p className="mt-2 text-lg text-gray-400 max-w-3xl mx-auto">{t(language, 'subtitle')}</p>
         </header>
         
         <Controls
@@ -93,16 +100,18 @@ const App: React.FC = () => {
           setBirthDate={setBirthDate}
           paperSize={paperSize}
           setPaperSize={setPaperSize}
+          language={language}
+          setLanguage={setLanguage}
           onDownload={handleDownloadPdf}
           isGenerating={isGenerating}
         />
 
         <div className="mt-8 bg-gray-800/50 rounded-lg shadow-2xl p-4 sm:p-6 overflow-x-auto">
-          <LifeCalendar ref={calendarRef} weeksLived={weeksLived} birthDate={birthDate}/>
+          <LifeCalendar ref={calendarRef} weeksLived={weeksLived} birthDate={birthDate} language={language}/>
         </div>
         
         <footer className="text-center mt-8 text-sm text-gray-500">
-          <p>Inspired by the Wait But Why post "Your Life in Weeks".</p>
+          <p>{t(language, 'footer')}</p>
         </footer>
       </div>
     </main>

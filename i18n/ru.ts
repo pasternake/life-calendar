@@ -1,0 +1,17 @@
+
+export default {
+  title: 'Календарь Жизни',
+  subtitle: 'Каждый квадрат - это неделя вашей жизни. Визуальное напоминание о том, что наше время драгоценно.',
+  dobLabel: 'Ваша Дата Рождения',
+  paperSizeLabel: 'Размер бумаги для PDF',
+  languageLabel: 'Язык',
+  downloadButton: 'Скачать PDF',
+  generatingButton: 'Генерация PDF...',
+  calendarTitle: 'Моя Жизнь в Неделях',
+  calendarSubtitle: '90 Лет · 4680 Недель',
+  bornLabel: 'Родился: {birthDate}',
+  footer: 'Вдохновлено постом "Ваша жизнь в неделях" из блога Wait But Why.',
+  pdfAlert: 'Библиотека для генерации PDF не загружена. Пожалуйста, обновите страницу.',
+  pdfError: 'Произошла ошибка при создании PDF. Подробности смотрите в консоли.',
+  weekTitle: 'Год {year}, Неделя {week}',
+};

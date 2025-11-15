@@ -1,12 +1,15 @@
 
 import type React from 'react';
-import type { PaperSize } from '../types';
+import type { PaperSize, Language } from '../types';
+import { t } from '../i18n/utils';
 
 interface ControlsProps {
   birthDate: string;
   setBirthDate: (date: string) => void;
   paperSize: PaperSize;
   setPaperSize: (size: PaperSize) => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
   onDownload: () => void;
   isGenerating: boolean;
 }
@@ -16,17 +19,19 @@ const Controls: React.FC<ControlsProps> = ({
   setBirthDate,
   paperSize,
   setPaperSize,
+  language,
+  setLanguage,
   onDownload,
   isGenerating,
 }) => {
   return (
     <div className="bg-gray-800/50 rounded-lg p-4 sm:p-6 shadow-lg backdrop-blur-sm sticky top-4 z-10">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-end">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6 items-end">
         
         {/* Date of Birth Input */}
         <div>
           <label htmlFor="birthDate" className="block text-sm font-medium text-gray-300 mb-1">
-            Your Date of Birth
+            {t(language, 'dobLabel')}
           </label>
           <input
             type="date"
@@ -40,7 +45,7 @@ const Controls: React.FC<ControlsProps> = ({
         {/* Paper Size Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-1">
-            PDF Paper Size
+            {t(language, 'paperSizeLabel')}
           </label>
           <div className="flex bg-gray-700 rounded-md p-1">
             {(['A3', 'A2'] as PaperSize[]).map((size) => (
@@ -58,6 +63,28 @@ const Controls: React.FC<ControlsProps> = ({
             ))}
           </div>
         </div>
+        
+        {/* Language Selection */}
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-1">
+            {t(language, 'languageLabel')}
+          </label>
+          <div className="flex bg-gray-700 rounded-md p-1">
+            {(['en', 'ru'] as Language[]).map((lang) => (
+              <button
+                key={lang}
+                onClick={() => setLanguage(lang)}
+                className={`w-full py-1.5 text-sm font-semibold rounded-md transition-colors ${
+                  language === lang
+                    ? 'bg-indigo-500 text-white shadow'
+                    : 'text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Download Button */}
         <button
@@ -71,10 +98,10 @@ const Controls: React.FC<ControlsProps> = ({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Generating PDF...
+              {t(language, 'generatingButton')}
             </>
           ) : (
-            'Download PDF'
+            t(language, 'downloadButton')
           )}
         </button>
       </div>

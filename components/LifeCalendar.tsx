@@ -1,21 +1,24 @@
 
 import React, { forwardRef } from 'react';
+import type { Language } from '../types';
+import { t } from '../i18n/utils';
 
 interface LifeCalendarProps {
   weeksLived: number;
   birthDate: string;
+  language: Language;
 }
 
 const TOTAL_YEARS = 90;
 const WEEKS_IN_YEAR = 52;
 
-const LifeCalendar = forwardRef<HTMLDivElement, LifeCalendarProps>(({ weeksLived, birthDate }, ref) => {
+const LifeCalendar = forwardRef<HTMLDivElement, LifeCalendarProps>(({ weeksLived, birthDate, language }, ref) => {
   return (
     <div ref={ref} className="bg-gray-900 text-white p-4 sm:p-6 md:p-8 font-sans inline-block">
       <div className="text-center mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-100">My Life in Weeks</h2>
-        <p className="text-gray-400">90 Years · 4680 Weeks</p>
-        {birthDate && <p className="text-xs text-gray-500 mt-1">Born: {birthDate}</p>}
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-100">{t(language, 'calendarTitle')}</h2>
+        <p className="text-gray-400">{t(language, 'calendarSubtitle')}</p>
+        {birthDate && <p className="text-xs text-gray-500 mt-1">{t(language, 'bornLabel', { birthDate })}</p>}
       </div>
 
       <div className="flex items-start">
@@ -37,7 +40,7 @@ const LifeCalendar = forwardRef<HTMLDivElement, LifeCalendarProps>(({ weeksLived
                 className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded-sm transition-colors duration-300 ${
                   isLived ? 'bg-indigo-400 hover:bg-indigo-300' : 'bg-gray-700 hover:bg-gray-600'
                 }`}
-                title={`Year ${year}, Week ${week}`}
+                title={t(language, 'weekTitle', { year, week })}
               ></div>
             );
           })}

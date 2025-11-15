@@ -1,0 +1,17 @@
+
+export default {
+  title: 'Life Calendar',
+  subtitle: 'Each box is a week of your life. A visual reminder that our time is precious.',
+  dobLabel: 'Your Date of Birth',
+  paperSizeLabel: 'PDF Paper Size',
+  languageLabel: 'Language',
+  downloadButton: 'Download PDF',
+  generatingButton: 'Generating PDF...',
+  calendarTitle: 'My Life in Weeks',
+  calendarSubtitle: '90 Years · 4680 Weeks',
+  bornLabel: 'Born: {birthDate}',
+  footer: 'Inspired by the Wait But Why post "Your Life in Weeks".',
+  pdfAlert: 'PDF generation library is not loaded. Please refresh the page.',
+  pdfError: 'An error occurred while generating the PDF. Please check the console for details.',
+  weekTitle: 'Year {year}, Week {week}',
+};

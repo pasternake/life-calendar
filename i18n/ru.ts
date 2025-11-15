@@ -1,4 +1,3 @@
-
 export default {
   title: 'Календарь Жизни',
   subtitle: 'Каждый квадрат - это неделя вашей жизни. Визуальное напоминание о том, что наше время драгоценно.',
@@ -13,8 +12,8 @@ export default {
   footer: 'Вдохновлено постом "Ваша жизнь в неделях" из блога Wait But Why.',
   pdfAlert: 'Библиотека для генерации PDF не загружена. Пожалуйста, обновите страницу.',
   pdfError: 'Произошла ошибка при создании PDF. Подробности смотрите в консоли.',
-  weekTitle: 'Год {year}, Неделя {week}',
-  goalSetTooltip: 'Год {year}, Неделя {week}\nЦель: {goal}',
+  weekDetailsTooltip: 'Год {year}, Неделя {week}\n{dateRange}',
+  goalDetailsTooltip: 'Год {year}, Неделя {week}\n{dateRange}\nЦель: {goal}',
   goalModalTitle: 'Цель на Год {year}, Неделя {week}',
   goalInputPlaceholder: 'Введите вашу цель или заметку на эту неделю...',
   saveButton: 'Сохранить',

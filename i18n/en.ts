@@ -1,4 +1,3 @@
-
 export default {
   title: 'Life Calendar',
   subtitle: 'Each box is a week of your life. A visual reminder that our time is precious.',
@@ -13,8 +12,8 @@ export default {
   footer: 'Inspired by the Wait But Why post "Your Life in Weeks".',
   pdfAlert: 'PDF generation library is not loaded. Please refresh the page.',
   pdfError: 'An error occurred while generating the PDF. Please check the console for details.',
-  weekTitle: 'Year {year}, Week {week}',
-  goalSetTooltip: 'Year {year}, Week {week}\nGoal: {goal}',
+  weekDetailsTooltip: 'Year {year}, Week {week}\n{dateRange}',
+  goalDetailsTooltip: 'Year {year}, Week {week}\n{dateRange}\nGoal: {goal}',
   goalModalTitle: 'Goal for Year {year}, Week {week}',
   goalInputPlaceholder: 'Enter your goal or milestone for this week...',
   saveButton: 'Save',

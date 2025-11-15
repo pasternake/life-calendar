@@ -29,12 +29,27 @@ const App: React.FC = () => {
   const weeksLived = useMemo(() => {
     if (!birthDate) return 0;
     try {
-      const dob = new Date(birthDate);
+      // Robustly parse the date string as a local date to avoid timezone issues.
+      // new Date('YYYY-MM-DD') is parsed as UTC and can be inconsistent.
+      // new Date(YYYY, MM-1, DD) is parsed as local time.
+      const parts = birthDate.split('-').map(Number);
+      if (parts.length !== 3 || parts.some(isNaN)) return 0;
+      const [year, month, day] = parts;
+      
+      const dob = new Date(year, month - 1, day);
       const today = new Date();
+
+      // Ensure the birth date is valid (e.g. not 2023-02-30)
+      if (dob.getFullYear() !== year || dob.getMonth() !== month - 1 || dob.getDate() !== day) {
+        return 0;
+      }
+      
       const diffInMillis = today.getTime() - dob.getTime();
       if (diffInMillis < 0) return 0;
+      
       return Math.floor(diffInMillis / (1000 * 60 * 60 * 24 * 7));
     } catch (error) {
+      console.error("Error calculating weeks lived:", error);
       return 0;
     }
   }, [birthDate]);

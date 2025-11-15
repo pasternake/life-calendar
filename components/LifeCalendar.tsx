@@ -1,4 +1,3 @@
-
 import React, { forwardRef, useState, useMemo } from 'react';
 import type { Language, Goals } from '../types';
 import { t } from '../i18n/utils';
@@ -21,12 +20,12 @@ const LifeCalendar = forwardRef<HTMLDivElement, LifeCalendarProps>(
     const [selectedWeek, setSelectedWeek] = useState<number | null>(null);
 
     /**
-     * Parses a 'YYYY-MM-DD' string into a Date object at midnight in the user's local timezone.
-     * This is more robust than new Date('YYYY-MM-DD') which can be inconsistent across browsers.
+     * Parses a 'YYYY-MM-DD' string into a Date object at midnight UTC.
+     * Using UTC prevents issues with local timezones and daylight saving.
      * @param dateString The date string to parse.
      * @returns A Date object or null if the string is invalid.
      */
-    const parseDateAsLocal = (dateString: string): Date | null => {
+    const parseDateAsUTC = (dateString: string): Date | null => {
       if (!dateString) return null;
       
       const parts = dateString.split('-');
@@ -38,11 +37,11 @@ const LifeCalendar = forwardRef<HTMLDivElement, LifeCalendarProps>(
 
       if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
 
-      const date = new Date(year, month, day);
+      const date = new Date(Date.UTC(year, month, day));
 
       // Verify that the created date is valid and wasn't rolled over by the Date constructor
       // e.g., for an invalid date like '2023-02-30'.
-      if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
+      if (date.getUTCFullYear() === year && date.getUTCMonth() === month && date.getUTCDate() === day) {
         return date;
       }
       
@@ -51,29 +50,46 @@ const LifeCalendar = forwardRef<HTMLDivElement, LifeCalendarProps>(
 
 
     const formatDate = (date: Date, lang: Language): string => {
+      // Dates are in UTC, so format them according to UTC to avoid timezone shifts.
       if (lang === 'ru') {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const year = date.getUTCFullYear();
         return `${day}.${month}.${year}`;
       }
       return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
+        timeZone: 'UTC',
       });
     };
     
     const getWeekDateRange = (weekNumber: number): string => {
-      const dob = parseDateAsLocal(birthDate);
+      const dob = parseDateAsUTC(birthDate);
       if (!dob) return '';
 
       try {
-        const startDate = new Date(dob.getTime());
-        startDate.setDate(startDate.getDate() + weekNumber * 7);
+        const yearIndex = Math.floor(weekNumber / WEEKS_IN_YEAR);
+        const weekIndexInYear = weekNumber % WEEKS_IN_YEAR;
+        
+        // The start of the year-row is the anniversary for that year.
+        const currentAnniversary = new Date(Date.UTC(dob.getUTCFullYear() + yearIndex, dob.getUTCMonth(), dob.getUTCDate()));
+
+        // The start of the week is 7 days * week index from the anniversary.
+        const startDate = new Date(currentAnniversary.getTime());
+        startDate.setUTCDate(startDate.getUTCDate() + weekIndexInYear * 7);
 
         const endDate = new Date(startDate.getTime());
-        endDate.setDate(endDate.getDate() + 6);
+
+        // For the last week of the year, extend it to the day before the next anniversary
+        // to account for the extra 1-2 days in a year (365/366 vs 364).
+        if (weekIndexInYear === WEEKS_IN_YEAR - 1) {
+          const nextAnniversary = new Date(Date.UTC(dob.getUTCFullYear() + yearIndex + 1, dob.getUTCMonth(), dob.getUTCDate()));
+          endDate.setTime(nextAnniversary.getTime() - (24 * 60 * 60 * 1000)); // Subtract one day in milliseconds
+        } else {
+          endDate.setUTCDate(endDate.getUTCDate() + 6);
+        }
         
         return `${formatDate(startDate, language)} - ${formatDate(endDate, language)}`;
       } catch (e) {
@@ -89,7 +105,7 @@ const LifeCalendar = forwardRef<HTMLDivElement, LifeCalendarProps>(
       if (weekNumber < weeksLived) {
         return 'bg-indigo-400 hover:bg-indigo-300 cursor-pointer';
       }
-      return 'bg-gray-700 hover:bg-gray-600 cursor-pointer';
+      return 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer';
     };
 
     const getWeekTitle = (weekNumber: number) => {
@@ -104,7 +120,7 @@ const LifeCalendar = forwardRef<HTMLDivElement, LifeCalendarProps>(
     };
 
     const formattedBirthDate = useMemo(() => {
-      const dob = parseDateAsLocal(birthDate);
+      const dob = parseDateAsUTC(birthDate);
       if (!dob) {
         return birthDate; // Fallback to original string if parsing fails
       }
@@ -117,15 +133,15 @@ const LifeCalendar = forwardRef<HTMLDivElement, LifeCalendarProps>(
 
     return (
       <>
-        <div ref={ref} className="bg-gray-900 text-white p-4 sm:p-6 md:p-8 font-sans inline-block">
+        <div ref={ref} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white p-4 sm:p-6 md:p-8 font-sans inline-block">
           <div className="text-center mb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-100">{t(language, 'calendarTitle')}</h2>
-            <p className="text-gray-400">{t(language, 'calendarSubtitle')}</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">{t(language, 'calendarTitle')}</h2>
+            <p className="text-gray-500 dark:text-gray-400">{t(language, 'calendarSubtitle')}</p>
             {birthDate && <p className="text-xs text-gray-500 mt-1">{t(language, 'bornLabel', { birthDate: formattedBirthDate })}</p>}
           </div>
 
           <div className="flex">
-            <div className="grid gap-y-0.5 mr-3 text-right font-mono text-xs text-gray-500">
+            <div className="grid gap-y-0.5 mr-3 text-right font-mono text-xs text-gray-400 dark:text-gray-500">
               {Array.from({ length: TOTAL_YEARS }).map((_, yearIndex) => (
                 <div key={yearIndex} className="h-3 md:h-3.5 flex items-center justify-end">
                   {(yearIndex + 1) % 5 === 0 && (yearIndex + 1)}

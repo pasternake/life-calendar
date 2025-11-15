@@ -1,8 +1,7 @@
-
-import React, { useState, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
 import LifeCalendar from './components/LifeCalendar';
 import Controls from './components/Controls';
-import type { PaperSize, Language, Goals } from './types';
+import type { PaperSize, Language, Goals, Theme } from './types';
 import { t } from './i18n/utils';
 
 // Declare global libraries loaded via script tags
@@ -18,36 +17,96 @@ const getInitialLanguage = (): Language => {
   return browserLang === 'ru' ? 'ru' : 'en';
 };
 
+const getInitialTheme = (): Theme => {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const storedPrefs = window.localStorage.getItem('theme');
+    if (storedPrefs === 'light' || storedPrefs === 'dark') {
+      return storedPrefs;
+    }
+  }
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    const userMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    if (userMedia.matches) {
+      return 'dark';
+    }
+  }
+  return 'light';
+};
+
+const getInitialBirthDate = (): string => {
+  const today = new Date();
+  // Set default to 30 years ago for a more interesting initial view
+  today.setFullYear(today.getFullYear() - 30);
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+
 const App: React.FC = () => {
-  const [birthDate, setBirthDate] = useState<string>('1990-01-01');
+  const [birthDate, setBirthDate] = useState<string>(getInitialBirthDate());
   const [paperSize, setPaperSize] = useState<PaperSize>('A3');
   const [language, setLanguage] = useState<Language>(getInitialLanguage());
+  const [theme, setTheme] = useState<Theme>(getInitialTheme());
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [goals, setGoals] = useState<Goals>({});
   const calendarRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+
   const weeksLived = useMemo(() => {
     if (!birthDate) return 0;
     try {
-      // Robustly parse the date string as a local date to avoid timezone issues.
-      // new Date('YYYY-MM-DD') is parsed as UTC and can be inconsistent.
-      // new Date(YYYY, MM-1, DD) is parsed as local time.
       const parts = birthDate.split('-').map(Number);
       if (parts.length !== 3 || parts.some(isNaN)) return 0;
       const [year, month, day] = parts;
-      
-      const dob = new Date(year, month - 1, day);
-      const today = new Date();
 
-      // Ensure the birth date is valid (e.g. not 2023-02-30)
-      if (dob.getFullYear() !== year || dob.getMonth() !== month - 1 || dob.getDate() !== day) {
+      // Use UTC for all calculations to avoid timezone issues.
+      const dob = new Date(Date.UTC(year, month - 1, day));
+      
+      // Check for invalid date rollover (e.g., Feb 30)
+      if (dob.getUTCFullYear() !== year || dob.getUTCMonth() !== month - 1 || dob.getUTCDate() !== day) {
         return 0;
       }
+
+      const today = new Date();
+      const todayUTC = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
       
-      const diffInMillis = today.getTime() - dob.getTime();
-      if (diffInMillis < 0) return 0;
+      if (todayUTC.getTime() < dob.getTime()) return 0;
+
+      // Calculate number of full years lived.
+      let yearsLived = todayUTC.getUTCFullYear() - dob.getUTCFullYear();
+      const anniversaryThisYear = new Date(Date.UTC(todayUTC.getUTCFullYear(), dob.getUTCMonth(), dob.getUTCDate()));
+      if (todayUTC < anniversaryThisYear) {
+        yearsLived--;
+      }
       
-      return Math.floor(diffInMillis / (1000 * 60 * 60 * 24 * 7));
+      // This can be negative if birthday hasn't happened yet this year. Ensure it is at least 0.
+      yearsLived = Math.max(0, yearsLived);
+
+      // Calculate the most recent anniversary date.
+      const mostRecentAnniversary = new Date(Date.UTC(dob.getUTCFullYear() + yearsLived, dob.getUTCMonth(), dob.getUTCDate()));
+      
+      // Calculate days passed since that anniversary.
+      const diffInMillis = todayUTC.getTime() - mostRecentAnniversary.getTime();
+      const daysSinceAnniversary = Math.floor(diffInMillis / (1000 * 60 * 60 * 24));
+      
+      // Calculate weeks passed in the current year of life, consistent with calendar display.
+      const weeksInCurrentYear = Math.floor(daysSinceAnniversary / 7);
+      
+      // Total weeks lived is full years * 52 weeks/year + weeks into the current year of life.
+      return (yearsLived * 52) + weeksInCurrentYear;
+      
     } catch (error) {
       console.error("Error calculating weeks lived:", error);
       return 0;
@@ -87,7 +146,7 @@ const App: React.FC = () => {
       
       const canvas = await window.html2canvas(calendarElement, {
         scale: 3,
-        backgroundColor: '#111827', // bg-gray-900
+        backgroundColor: theme === 'dark' ? '#111827' : '#ffffff',
         useCORS: true,
       });
 
@@ -121,14 +180,14 @@ const App: React.FC = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [paperSize, birthDate, language]);
+  }, [paperSize, birthDate, language, theme]);
 
   return (
-    <main className="min-h-screen bg-gray-900 text-gray-200 font-sans flex flex-col items-center p-4 sm:p-6 md:p-8">
+    <main className="min-h-screen text-gray-800 dark:text-gray-200 font-sans flex flex-col items-center p-4 sm:p-6 md:p-8 transition-colors duration-300">
       <div className="w-full max-w-7xl mx-auto">
         <header className="text-center mb-6">
-          <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight">{t(language, 'title')}</h1>
-          <p className="mt-2 text-lg text-gray-400 max-w-3xl mx-auto">{t(language, 'subtitle')}</p>
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white tracking-tight">{t(language, 'title')}</h1>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">{t(language, 'subtitle')}</p>
         </header>
         
         <Controls
@@ -138,11 +197,13 @@ const App: React.FC = () => {
           setPaperSize={setPaperSize}
           language={language}
           setLanguage={setLanguage}
+          theme={theme}
+          setTheme={setTheme}
           onDownload={handleDownloadPdf}
           isGenerating={isGenerating}
         />
 
-        <div className="mt-8 bg-gray-800/50 rounded-lg shadow-2xl p-4 sm:p-6 overflow-x-auto">
+        <div className="mt-8 bg-white/70 dark:bg-gray-800/50 rounded-lg shadow-2xl p-4 sm:p-6 overflow-x-auto">
           <LifeCalendar 
             ref={calendarRef} 
             weeksLived={weeksLived} 

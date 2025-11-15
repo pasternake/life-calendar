@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import type { Language } from '../types';
 import { t } from '../i18n/utils';
@@ -67,10 +66,10 @@ const GoalModal: React.FC<GoalModalProps> = ({
       aria-labelledby="goal-modal-title"
     >
       <div 
-        className="bg-gray-800 rounded-lg shadow-2xl p-6 w-full max-w-md"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl p-6 w-full max-w-md"
         onClick={e => e.stopPropagation()}
       >
-        <h2 id="goal-modal-title" className="text-xl font-bold text-white mb-4">
+        <h2 id="goal-modal-title" className="text-xl font-bold text-gray-900 dark:text-white mb-4">
           {t(language, 'goalModalTitle', { year, week })}
         </h2>
 
@@ -78,7 +77,7 @@ const GoalModal: React.FC<GoalModalProps> = ({
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={t(language, 'goalInputPlaceholder')}
-          className="w-full h-32 bg-gray-700 border-gray-600 text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3 text-base resize-none"
+          className="w-full h-32 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3 text-base resize-none"
           autoFocus
         />
 
@@ -99,7 +98,7 @@ const GoalModal: React.FC<GoalModalProps> = ({
            )}
           <button
             onClick={onClose}
-            className="w-full sm:w-auto justify-center inline-flex items-center bg-gray-600 text-white font-bold py-2 px-6 rounded-md shadow-lg hover:bg-gray-500 transition-colors sm:mr-auto"
+            className="w-full sm:w-auto justify-center inline-flex items-center bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-white font-bold py-2 px-6 rounded-md shadow-lg dark:hover:bg-gray-500 transition-colors sm:mr-auto"
           >
             {t(language, 'closeButton')}
           </button>
